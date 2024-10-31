@@ -1,0 +1,570 @@
+<html><head><base href="." />
+<meta charset="UTF-8">
+<title>CyberNex Hub</title>
+<style>
+:root {
+  --neon-blue: #00f3ff;
+  --dark-bg: #0a0a0a;
+  --matrix-green: #00ff00;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Courier New', monospace;
+}
+
+body {
+  background-color: var(--dark-bg);
+  color: var(--neon-blue);
+  height: 100vh;
+  overflow: hidden;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.header {
+  background: rgba(0, 0, 0, 0.8);
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid var(--neon-blue);
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-shadow: 0 0 10px var(--neon-blue);
+}
+
+.register-btn {
+  background: transparent;
+  color: var(--neon-blue);
+  border: 1px solid var(--neon-blue);
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.register-btn:hover {
+  background: var(--neon-blue);
+  color: var(--dark-bg);
+  box-shadow: 0 0 15px var(--neon-blue);
+}
+
+.chat-container {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.message {
+  margin: 0.5rem 0;
+  padding: 0.5rem 1rem 2rem 0.5rem;
+  border-left: 3px solid var(--neon-blue);
+  background: rgba(0, 243, 255, 0.1);
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+}
+
+.message.selected {
+  background: rgba(0, 243, 255, 0.3);
+  box-shadow: 0 0 10px var(--neon-blue);
+}
+
+.message-actions {
+  position: absolute;
+  right: 0.5rem;
+  bottom: 0.3rem;
+  display: none;
+  gap: 0.5rem;
+}
+
+.message.selected .message-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-btn {
+  background: transparent;
+  border: 1px solid;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.8rem;
+}
+
+.delete-btn {
+  color: #ff0033;
+  border-color: #ff0033;
+}
+
+.delete-btn:hover {
+  background: #ff0033;
+  color: var(--dark-bg);
+  box-shadow: 0 0 15px #ff0033;
+}
+
+.reply-btn {
+  color: #00ff00;
+  border-color: #00ff00;
+}
+
+.reply-btn:hover {
+  background: #00ff00;
+  color: var(--dark-bg);
+  box-shadow: 0 0 15px #00ff00;
+}
+
+.message-user {
+  color: #ff9900;
+  font-weight: bold;
+}
+
+.message-id {
+  font-size: 0.7em;
+  color: #666;
+  margin-left: 0.5rem;
+}
+
+.reply-to {
+  font-size: 0.8em;
+  color: var(--matrix-green);
+  margin-bottom: 0.3rem;
+  padding: 0.2rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-left: 2px solid var(--matrix-green);
+}
+
+.input-container {
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  gap: 1rem;
+}
+
+#message-input {
+  flex: 1;
+  background: rgba(0, 243, 255, 0.1);
+  border: 1px solid var(--neon-blue);
+  color: var(--neon-blue);
+  padding: 0.5rem;
+}
+
+#send-btn {
+  background: transparent;
+  color: var(--neon-blue);
+  border: 1px solid var(--neon-blue);
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+#send-btn:hover {
+  background: var(--neon-blue);
+  color: var(--dark-bg);
+  box-shadow: 0 0 15px var(--neon-blue);
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.95);
+  padding: 2rem;
+  border: 2px solid var(--neon-blue);
+  box-shadow: 0 0 20px var(--neon-blue);
+  z-index: 1000;
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.modal input {
+  background: rgba(0, 243, 255, 0.1);
+  border: 1px solid var(--neon-blue);
+  color: var(--neon-blue);
+  padding: 0.5rem;
+}
+
+.overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 999;
+}
+
+.profile-card {
+  display: none;
+  position: fixed;
+  top: 60px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.95);
+  padding: 1rem;
+  border: 2px solid var(--neon-blue);
+  box-shadow: 0 0 20px var(--neon-blue);
+  z-index: 998;
+}
+
+#welcome-modal {
+  max-width: 600px;
+  width: 90%;
+}
+
+.feature-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.feature {
+  background: rgba(0, 243, 255, 0.1);
+  padding: 1rem;
+  border-left: 3px solid var(--neon-blue);
+}
+
+.feature h3 {
+  color: var(--neon-blue);
+  margin-bottom: 0.5rem;
+}
+
+.feature p {
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.start-btn {
+  background: transparent;
+  color: var(--matrix-green);
+  border: 1px solid var(--matrix-green);
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  font-size: 1.1rem;
+}
+
+.start-btn:hover {
+  background: var(--matrix-green);
+  color: var(--dark-bg);
+  box-shadow: 0 0 15px var(--matrix-green);
+}
+
+.matrix-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+.profile-options {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.change-name-btn {
+  background: transparent;
+  color: var(--neon-blue);
+  border: 1px solid var(--neon-blue);
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.change-name-btn:hover {
+  background: var(--neon-blue);
+  color: var(--dark-bg);
+  box-shadow: 0 0 15px var(--neon-blue);
+}
+
+.profile-id {
+  display: none;
+}
+</style>
+</head>
+<body>
+<canvas class="matrix-bg" id="matrix"></canvas>
+<div class="container">
+  <header class="header">
+    <div class="logo">CyberNex Hub</div>
+    <button class="register-btn" onclick="showRegisterModal()">Register</button>
+  </header>
+  
+  <div class="chat-container" id="chat-container"></div>
+  
+  <div class="input-container">
+    <input type="text" id="message-input" placeholder="Enter your message..." />
+    <button id="send-btn" onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
+<div class="overlay" id="overlay"></div>
+
+<div class="modal" id="register-modal">
+  <div class="modal-content">
+    <h2>Register</h2>
+    <p id="current-user-info" style="display: none;">Current username: <span id="current-username"></span></p>
+    <input type="text" id="username-input" placeholder="Choose username" />
+    <button class="register-btn" onclick="registerUser()">Create Account</button>
+  </div>
+</div>
+
+<div class="modal" id="welcome-modal">
+  <div class="modal-content">
+    <h2>¡Bienvenido a CyberNex Hub!</h2>
+    <div class="feature-list">
+      <div class="feature">
+        <h3>🌟 Registro de Usuario</h3>
+        <p>Crea tu identidad hacker única con un nombre de usuario personalizado y una cuenta anónima segura</p>
+      </div>
+      <div class="feature">
+        <h3>💬 Mensajería Interactiva</h3>
+        <p>Envía mensajes en nuestra interfaz de chat con temática cyberpunk</p>
+      </div>
+      <div class="feature">
+        <h3>↩️ Respuestas a Mensajes</h3>
+        <p>Responde a mensajes específicos para mantener las conversaciones organizadas</p>
+      </div>
+      <div class="feature">
+        <h3>🗑️ Gestión de Mensajes</h3>
+        <p>Elimina tus propios mensajes en cualquier momento</p>
+      </div>
+    </div>
+    <button class="start-btn" onclick="closeWelcomeModal()">Entrar al Sistema</button>
+  </div>
+</div>
+
+<div class="profile-card" id="profile-card">
+  <h3>Profile</h3>
+  <p>Username: <span id="profile-username"></span></p>
+  <p>ID: <span id="profile-id"></span></p>
+  <p>Messages sent: <span id="profile-messages">0</span></p>
+  <div class="profile-options">
+    <button class="change-name-btn" onclick="showRegisterModal()">Change Username</button>
+  </div>
+</div>
+
+<script>
+let currentUser = null;
+let messageCount = 0;
+
+// Matrix background effect
+const canvas = document.getElementById('matrix');
+const ctx = canvas.getContext('2d');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%^&*";
+const fontSize = 10;
+const columns = canvas.width / fontSize;
+
+const drops = [];
+for(let i = 0; i < columns; i++) {
+  drops[i] = 1;
+}
+
+function drawMatrix() {
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  ctx.fillStyle = '#0F0';
+  ctx.font = fontSize + 'px monospace';
+  
+  for(let i = 0; i < drops.length; i++) {
+    const text = characters.charAt(Math.floor(Math.random() * characters.length));
+    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+    
+    if(drops[i] * fontSize > canvas.height && Math.random() > 0.975)
+      drops[i] = 0;
+    
+    drops[i]++;
+  }
+}
+
+setInterval(drawMatrix, 33);
+
+function showRegisterModal() {
+  document.getElementById('overlay').style.display = 'block';
+  document.getElementById('register-modal').style.display = 'block';
+  
+  if(currentUser) {
+    document.getElementById('current-user-info').style.display = 'block';
+    document.getElementById('current-username').textContent = currentUser.username;
+  }
+}
+
+function generateId() {
+  return 'nx_' + Math.random().toString(36).substr(2, 9).toUpperCase();
+}
+
+function registerUser() {
+  const username = document.getElementById('username-input').value;
+  if(username.trim() === '') return;
+  
+  if(!currentUser) {
+    currentUser = {
+      username: username,
+      id: generateId(),
+      messageCount: 0
+    };
+  } else {
+    currentUser.username = username;
+  }
+  
+  document.getElementById('overlay').style.display = 'none';
+  document.getElementById('register-modal').style.display = 'none';
+  document.getElementById('username-input').value = '';
+  document.getElementById('current-user-info').style.display = 'none';
+  
+  updateProfile();
+  document.getElementById('profile-card').style.display = 'block';
+}
+
+function updateProfile() {
+  if(!currentUser) return;
+  
+  document.getElementById('profile-username').textContent = currentUser.username;
+  document.getElementById('profile-id').textContent = currentUser.id;
+  document.getElementById('profile-messages').textContent = currentUser.messageCount;
+}
+
+function sendMessage(replyToId = null) {
+  if(!currentUser) {
+    alert('Please register first!');
+    return;
+  }
+  
+  const messageInput = document.getElementById('message-input');
+  const message = messageInput.value.trim();
+  
+  if(message === '') return;
+  
+  const chatContainer = document.getElementById('chat-container');
+  const messageElement = document.createElement('div');
+  messageElement.className = 'message';
+  
+  let replyToHtml = '';
+  if(replyToId) {
+    const replyToMessage = document.querySelector(`[data-message-id="${replyToId}"]`);
+    if(replyToMessage) {
+      const replyToText = replyToMessage.querySelector('.message-text').textContent;
+      replyToHtml = `<div class="reply-to">Replying to: ${replyToText}</div>`;
+    }
+  }
+  
+  const messageId = generateId();
+  messageElement.setAttribute('data-message-id', messageId);
+  messageElement.setAttribute('data-user-id', currentUser.id);
+  
+  messageElement.innerHTML = `
+    ${replyToHtml}
+    <span class="message-user">${currentUser.username}</span>
+    <span class="message-text">${message}</span>
+    <div class="message-actions">
+      <button class="action-btn reply-btn" onclick="replyToMessage('${messageId}')">Reply</button>
+      ${currentUser.id === messageElement.getAttribute('data-user-id') ? 
+        `<button class="action-btn delete-btn" onclick="deleteMessage(this)">Delete</button>` : ''}
+    </div>
+  `;
+  
+  messageElement.addEventListener('click', function(e) {
+    if (!e.target.classList.contains('action-btn')) {
+      toggleMessageSelection(this);
+    }
+  });
+  
+  chatContainer.appendChild(messageElement);
+  chatContainer.scrollTop = chatContainer.scrollHeight;
+  
+  messageInput.value = '';
+  currentUser.messageCount++;
+  updateProfile();
+}
+
+function replyToMessage(messageId) {
+  const messageInput = document.getElementById('message-input');
+  messageInput.focus();
+  sendMessage(messageId);
+}
+
+function toggleMessageSelection(messageElement) {
+  const messages = document.querySelectorAll('.message');
+  messages.forEach(msg => {
+    if (msg !== messageElement) {
+      msg.classList.remove('selected');
+    }
+  });
+  messageElement.classList.toggle('selected');
+}
+
+function deleteMessage(btn) {
+  const messageElement = btn.closest('.message');
+  const messageUserId = messageElement.getAttribute('data-user-id');
+  
+  if(currentUser && currentUser.id === messageUserId) {
+    messageElement.remove();
+    currentUser.messageCount--;
+    updateProfile();
+  } else {
+    alert('You can only delete your own messages!');
+  }
+}
+
+document.getElementById('message-input').addEventListener('keypress', (e) => {
+  if(e.key === 'Enter') sendMessage();
+});
+
+document.addEventListener('click', function(event) {
+  const profileCard = document.getElementById('profile-card');
+  const registerBtn = document.querySelector('.register-btn');
+  
+  if (!profileCard.contains(event.target) && event.target !== registerBtn) {
+    profileCard.style.display = 'none';
+  }
+});
+
+document.getElementById('overlay').addEventListener('click', function() {
+  document.getElementById('overlay').style.display = 'none';
+  document.getElementById('register-modal').style.display = 'none';
+  document.getElementById('welcome-modal').style.display = 'none';
+});
+
+window.addEventListener('load', () => {
+  document.getElementById('overlay').style.display = 'block';
+  document.getElementById('welcome-modal').style.display = 'block';
+});
+
+function closeWelcomeModal() {
+  document.getElementById('overlay').style.display = 'none';
+  document.getElementById('welcome-modal').style.display = 'none';
+}
+
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+</script>
+</body></html>
